@@ -1,16 +1,15 @@
+[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/gXKuYzJA)
+## Learning about Fundamental FrontEnd Developer
+
+### Nama: Rama Syailana Dewa
+
+### Deploy Link : https://fe-pokemon-masdewaa.vercel.app/ 
+
 # PokeDex Explorer (React + shadcn/ui)
 
 ## Overview
 
 PokeDex Explorer is a React + Vite single-page interface that showcases Pokemon data fetched from the public [PokeAPI](https://pokeapi.co/api/v2/pokemon). The experience is built with Tailwind CSS and shadcn/ui components to deliver a modern dashboard, insight cards, powerful filtering, and a detail modal with rich stats and attributes.
-
-## Features
-
-- Batch loads PokeAPI data with animated skeleton placeholders and retry handling.
-- Full-text search by name or Pokedex ID, elemental type filtering, and multiple sort criteria.
-- Insight widgets summarising total Pokemon loaded, unique types encountered, and average base experience of the current view.
-- Detail modal highlights stats, abilities, signature moves, and physical attributes with responsive layout.
-- Light/dark themes persisted with local storage and a polished gradient background.
 
 ## Tech Stack & Libraries
 
@@ -59,20 +58,9 @@ src/
 
 ## Screenshots
 
-Add real screenshots from your environment before submitting:
-
 | Dashboard | Detail Modal |
 | --- | --- |
 | ![Dashboard](./screenshots/Dashboard.png) | ![Detail Modal](./screenshots/Modal.png) |
-
-> Place the captured images in a `screenshots/` folder at the project root to keep the paths valid.
-
-## Deployment Checklist
-
-1. Capture the dashboard and detail modal screenshots and commit them under `screenshots/`.
-2. Run `npm run build` to ensure the project compiles without errors.
-3. Push the repository to the assigned `Fundamental_FE/<name>` GitHub Classroom remote.
-4. Submit the Classroom link as requested.
 
 ## API Usage Notes
 
