@@ -5,11 +5,11 @@
 
 ### Deploy Link : https://fe-pokemon-masdewaa.vercel.app/ 
 
-# PokeDex Explorer (React + shadcn/ui)
+# PokeDewa Explorer (React + shadcn/ui)
 
 ## Overview
 
-PokeDex Explorer is a React + Vite single-page interface that showcases Pokemon data fetched from the public [PokeAPI](https://pokeapi.co/api/v2/pokemon). The experience is built with Tailwind CSS and shadcn/ui components to deliver a modern dashboard, insight cards, powerful filtering, and a detail modal with rich stats and attributes.
+PokeDewa Explorer is a React + Vite single-page interface that showcases Pokemon data fetched from the public [PokeAPI](https://pokeapi.co/api/v2/pokemon). The experience is built with Tailwind CSS and shadcn/ui components to deliver a modern dashboard, insight cards, powerful filtering, and a detail modal with rich stats and attributes.
 
 ## Tech Stack & Libraries
 
