@@ -4,6 +4,8 @@ import type {
   PokemonEvolutionStage,
 } from "@/types/pokemon";
 
+const FALLBACK_IMAGE = "/logo.png";
+
 const API_BASE = "https://pokeapi.co/api/v2";
 
 export async function fetchPokemonBatch(
@@ -37,6 +39,7 @@ export async function fetchPokemonBatch(
     results: detailedPokemon,
     nextOffset: offset + listData.results.length,
     hasMore: Boolean(listData.next),
+    totalCount: listData.count,
   };
 }
 
@@ -58,6 +61,17 @@ export async function fetchPokemonTypes(): Promise<string[]> {
 }
 
 function simplifyPokemon(detail: any): PokemonData {
+  const portrait =
+    detail.sprites?.other?.["official-artwork"]?.front_default ??
+    detail.sprites?.other?.home?.front_default ??
+    detail.sprites?.front_default ??
+    getOfficialArtworkUrl(detail.id);
+
+  const animated =
+    detail.sprites?.versions?.["generation-v"]?.["black-white"]?.animated?.front_default ??
+    detail.sprites?.other?.showdown?.front_default ??
+    null;
+
   const stats = detail.stats as Array<{
     base_stat: number;
     stat: { name: string };
@@ -76,15 +90,8 @@ function simplifyPokemon(detail: any): PokemonData {
   return {
     id: detail.id,
     name: capitalize(detail.name),
-    image:
-      detail.sprites?.other?.["official-artwork"]?.front_default ??
-      detail.sprites?.other?.home?.front_default ??
-      detail.sprites?.front_default ??
-      "",
-    animatedSprite:
-      detail.sprites?.versions?.["generation-v"]?.["black-white"]?.animated?.front_default ??
-      detail.sprites?.other?.showdown?.front_default ??
-      undefined,
+    image: portrait || FALLBACK_IMAGE,
+    animatedSprite: animated || undefined,
     cryUrl: detail.cries?.latest ?? detail.cries?.legacy ?? undefined,
     types: (detail.types as Array<{ type: { name: string } }>).map((type) => type.type.name),
     weight: detail.weight / 10,
@@ -139,7 +146,7 @@ export async function fetchEvolutionChain(pokemonId: number): Promise<PokemonEvo
       stages.push({
         id,
         name: capitalize(node.species.name),
-        image: getOfficialArtworkUrl(id),
+        image: getOfficialArtworkUrl(id) || FALLBACK_IMAGE,
       });
     }
 

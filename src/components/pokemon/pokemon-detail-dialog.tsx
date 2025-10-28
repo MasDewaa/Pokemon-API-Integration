@@ -108,7 +108,7 @@ export function PokemonDetailDialog({ pokemon, open, onOpenChange }: PokemonDeta
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-hidden border-border/60 bg-card/95 p-0 sm:max-w-4xl">
+      <DialogContent className="max-h-[90vh] overflow-hidden border-border/60 bg-card/95 p-0 sm:max-w-5xl">
         {pokemon && (
           <ScrollArea className="max-h-[90vh]">
             <div className="grid gap-8 p-6 sm:p-10">
@@ -141,7 +141,7 @@ export function PokemonDetailDialog({ pokemon, open, onOpenChange }: PokemonDeta
                   <div className="relative flex h-48 w-48 items-center justify-center">
                     <div className="absolute inset-6 rounded-[40%] bg-primary/10 blur-2xl" />
                     <img
-                      src={pokemon.image}
+                      src={pokemon.animatedSprite ?? pokemon.image}
                       alt={pokemon.name}
                       className="relative h-44 w-44 object-contain drop-shadow-2xl"
                     />
@@ -160,6 +160,45 @@ export function PokemonDetailDialog({ pokemon, open, onOpenChange }: PokemonDeta
                       <p className="text-foreground">{pokemon.types.join(", ")}</p>
                     </div>
                   </div>
+                  <section className="w-full space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-foreground">Evolution Line</h3>
+                      {isEvolutionLoading ? (
+                        <span className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                          Loading…
+                        </span>
+                      ) : null}
+                    </div>
+                    {evolutionError ? (
+                      <p className="text-sm text-destructive">{evolutionError}</p>
+                    ) : evolutions.length > 1 ? (
+                      <div className="flex flex-wrap items-center justify-center gap-4">
+                        {evolutions.map((stage, index) => (
+                          <div key={stage.id} className="flex items-center gap-4">
+                            <div className="flex flex-col items-center gap-2 rounded-2xl border border-primary/30 bg-primary/5 px-4 py-3 shadow-sm">
+                              <div className="h-20 w-20 overflow-hidden rounded-xl bg-background/70 shadow-inner">
+                                <img
+                                  src={stage.image}
+                                  alt={stage.name}
+                                  className="h-full w-full object-contain"
+                                  loading="lazy"
+                                />
+                              </div>
+                              <span className="text-sm font-semibold text-foreground">{stage.name}</span>
+                              <span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-primary/70">
+                                Stage {index + 1}
+                              </span>
+                            </div>
+                            {index < evolutions.length - 1 ? (
+                              <span className="text-primary/70">→</span>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center">No further evolutions.</p>
+                    )}
+                  </section>
                 </div>
                 <div className="flex-1 space-y-8">
                   <section className="space-y-4">
@@ -209,45 +248,6 @@ export function PokemonDetailDialog({ pokemon, open, onOpenChange }: PokemonDeta
                         )}
                       </div>
                     </div>
-                  </section>
-                  <section className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold text-foreground">Evolution Line</h3>
-                      {isEvolutionLoading ? (
-                        <span className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-                          Loading…
-                        </span>
-                      ) : null}
-                    </div>
-                    {evolutionError ? (
-                      <p className="text-sm text-destructive">{evolutionError}</p>
-                    ) : evolutions.length > 1 ? (
-                      <div className="flex flex-wrap items-center gap-4">
-                        {evolutions.map((stage, index) => (
-                          <div key={stage.id} className="flex items-center gap-4">
-                            <div className="flex flex-col items-center gap-2 rounded-2xl border border-primary/30 bg-primary/5 px-4 py-3 shadow-sm">
-                              <div className="h-20 w-20 overflow-hidden rounded-xl bg-background/70 shadow-inner">
-                                <img
-                                  src={stage.image}
-                                  alt={stage.name}
-                                  className="h-full w-full object-contain"
-                                  loading="lazy"
-                                />
-                              </div>
-                              <span className="text-sm font-semibold text-foreground">{stage.name}</span>
-                              <span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-primary/70">
-                                Stage {index + 1}
-                              </span>
-                            </div>
-                            {index < evolutions.length - 1 ? (
-                              <span className="text-primary/70">→</span>
-                            ) : null}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No further evolutions.</p>
-                    )}
                   </section>
                 </div>
               </div>

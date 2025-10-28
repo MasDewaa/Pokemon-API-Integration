@@ -23,6 +23,7 @@ export interface PokemonBatchResponse {
   results: PokemonData[];
   nextOffset: number;
   hasMore: boolean;
+  totalCount: number;
 }
 
 export interface PokemonEvolutionStage {

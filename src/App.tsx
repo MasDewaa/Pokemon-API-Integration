@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { PokemonCard } from "@/components/pokemon/pokemon-card";
 import { PokemonDetailDialog } from "@/components/pokemon/pokemon-detail-dialog";
@@ -43,10 +43,10 @@ export default function App() {
     const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
     return prefersDark ? "dark" : "light";
   });
-  const [allPokemon, setAllPokemon] = useState<PokemonData[]>([]);
+  const [pokemonPages, setPokemonPages] = useState<Record<number, PokemonData[]>>({});
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
   const [types, setTypes] = useState<string[]>([]);
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,20 +69,54 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    loadPokemon();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     fetchPokemonTypes()
       .then(setTypes)
       .catch(() => setTypes([]));
   }, []);
 
+  const fetchPageData = useCallback(
+    async (targetPage: number) => {
+      if (pokemonPages[targetPage]) {
+        return;
+      }
+      setIsLoading(true);
+      setError(null);
+      try {
+        const offset = (targetPage - 1) * PAGE_SIZE;
+        const { results, totalCount: total } = await fetchPokemonBatch(offset, PAGE_SIZE);
+        setPokemonPages((prev) => ({
+          ...prev,
+          [targetPage]: results,
+        }));
+        setTotalCount(total);
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [pokemonPages]
+  );
+
+  useEffect(() => {
+    fetchPageData(page);
+  }, [page, fetchPageData]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, selectedType, sortMode]);
+
+  const aggregatedPokemon = useMemo(() => {
+    return Object.keys(pokemonPages)
+      .map(Number)
+      .sort((a, b) => a - b)
+      .flatMap((pageNumber) => pokemonPages[pageNumber] ?? []);
+  }, [pokemonPages]);
+
   const filteredPokemon = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    let result = [...allPokemon];
+    let result = [...aggregatedPokemon];
 
     if (query) {
       result = result.filter((pokemon) => {
@@ -99,19 +133,40 @@ export default function App() {
     result.sort((a, b) => sortPokemon(a, b, sortMode));
 
     return result;
-  }, [allPokemon, search, selectedType, sortMode]);
+  }, [aggregatedPokemon, search, selectedType, sortMode]);
+
+  const totalFilteredPages = Math.max(1, Math.ceil(filteredPokemon.length / PAGE_SIZE));
+  const totalPagesFromApi = useMemo(() => {
+    if (totalCount) {
+      return Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+    }
+    const loadedPages = Object.keys(pokemonPages).length;
+    return Math.max(1, loadedPages || 1);
+  }, [totalCount, pokemonPages]);
+
+  useEffect(() => {
+    if (page > totalPagesFromApi) {
+      setPage(totalPagesFromApi);
+    }
+  }, [page, totalPagesFromApi]);
+
+  const currentPageIndex = Math.max(0, Math.min(page, totalFilteredPages) - 1);
+  const paginatedPokemon = useMemo(() => {
+    const start = currentPageIndex * PAGE_SIZE;
+    return filteredPokemon.slice(start, start + PAGE_SIZE);
+  }, [filteredPokemon, currentPageIndex]);
 
   const uniqueTypeCount = useMemo(() => {
-    return new Set(allPokemon.flatMap((pokemon) => pokemon.types)).size;
-  }, [allPokemon]);
-
-  const averageBaseExperience = useMemo(() => {
-    if (!filteredPokemon.length) return 0;
-    const total = filteredPokemon.reduce((sum, pokemon) => sum + pokemon.baseExperience, 0);
-    return total / filteredPokemon.length;
+    return new Set(filteredPokemon.flatMap((pokemon) => pokemon.types)).size;
   }, [filteredPokemon]);
 
-  const roster = filteredPokemon.length ? filteredPokemon : allPokemon;
+  const averageBaseExperience = useMemo(() => {
+    if (!paginatedPokemon.length) return 0;
+    const total = paginatedPokemon.reduce((sum, pokemon) => sum + pokemon.baseExperience, 0);
+    return total / paginatedPokemon.length;
+  }, [paginatedPokemon]);
+
+  const roster = paginatedPokemon.length ? paginatedPokemon : filteredPokemon;
 
   const arcadeData = useMemo(() => {
     if (!roster.length) {
@@ -230,24 +285,8 @@ export default function App() {
 
   const { featured, averagePower, heroCategories, highlights, summary } = arcadeData;
 
-  async function loadPokemon() {
-    if (isLoading || !hasMore) return;
-    setIsLoading(true);
-    setError(null);
-    try {
-      const { results, nextOffset, hasMore: more } = await fetchPokemonBatch(offset, PAGE_SIZE);
-      setAllPokemon((prev) => [...prev, ...results]);
-      setOffset(nextOffset);
-      setHasMore(more);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   function handleRetry() {
-    loadPokemon();
+    fetchPageData(page);
   }
 
   function handleSelectPokemon(pokemon: PokemonData) {
@@ -262,7 +301,25 @@ export default function App() {
     }
   }
 
-  const showSkeletons = isLoading && allPokemon.length === 0;
+  const showSkeletons = isLoading && !(pokemonPages[page]?.length);
+  const displayTotalPages = search || selectedType ? totalFilteredPages : totalPagesFromApi;
+  const canGoPrev = page > 1;
+  const canGoNext = page < displayTotalPages;
+  const [pageInput, setPageInput] = useState<string>(String(page));
+
+  useEffect(() => {
+    setPageInput(String(Math.min(page, displayTotalPages)));
+  }, [page, displayTotalPages]);
+
+  const handlePageSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const parsed = Number(pageInput);
+    if (!Number.isFinite(parsed)) {
+      return;
+    }
+    const clamped = Math.min(Math.max(1, Math.floor(parsed)), displayTotalPages);
+    setPage(clamped);
+  };
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-background via-background/80 to-background">
@@ -355,7 +412,7 @@ export default function App() {
 
         <PokemonHero
           featured={featured}
-          totalLoaded={roster.length}
+          totalLoaded={filteredPokemon.length}
           averagePower={averagePower}
           topCategories={heroCategories}
         />
@@ -365,7 +422,7 @@ export default function App() {
         ) : null}
 
         <PokemonMetrics
-          loadedCount={allPokemon.length}
+          loadedCount={filteredPokemon.length}
           uniqueTypes={uniqueTypeCount}
           averageBaseExperience={averageBaseExperience}
         />
@@ -383,9 +440,9 @@ export default function App() {
             </Card>
           ) : showSkeletons ? (
             <PokemonSkeletonGrid count={9} />
-          ) : filteredPokemon.length ? (
+          ) : paginatedPokemon.length ? (
             <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {filteredPokemon.map((pokemon) => (
+              {paginatedPokemon.map((pokemon) => (
                 <PokemonCard key={pokemon.id} pokemon={pokemon} onSelect={handleSelectPokemon} />
               ))}
             </div>
@@ -398,14 +455,59 @@ export default function App() {
             </Card>
           )}
 
-          <div className="flex justify-center">
-            <Button
-              onClick={loadPokemon}
-              disabled={isLoading || !hasMore}
-              className="h-12 min-w-[220px] rounded-full text-base"
+          <div className="flex flex-col items-center justify-end gap-4 sm:flex-row">
+            <form
+              onSubmit={handlePageSubmit}
+              className="flex flex-wrap items-center justify-center gap-3 sm:justify-start"
             >
-              {hasMore ? (isLoading ? "Loading…" : "Load more Pokémon") : "All Pokémon loaded"}
-            </Button>
+              <Button
+                type="button"
+                variant="default"
+                onClick={() => setPage(1)}
+                disabled={page === 1 || isLoading}
+                className="rounded-full px-4"
+              >
+                «
+              </Button>
+              <Button
+                type="button"
+                variant="default"
+                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                disabled={!canGoPrev || isLoading}
+                className="rounded-full px-4"
+              >
+                ‹
+              </Button>
+              <label className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <span>Page</span>
+                <input
+                  value={pageInput}
+                  onChange={(event) => setPageInput(event.target.value.replace(/[^0-9]/g, ""))}
+                  className="h-10 w-16 rounded-xl border border-border/100 bg-background/80 text-center text-base font-semibold text-foreground shadow-inner"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                />
+                <span className="whitespace-nowrap">of {displayTotalPages}</span>
+              </label>
+              <Button
+                type="button"
+                variant="default"
+                onClick={() => setPage((prev) => Math.min(displayTotalPages, prev + 1))}
+                disabled={!canGoNext || isLoading}
+                className="rounded-full px-4"
+              >
+                ›
+              </Button>
+              <Button
+                type="button"
+                variant="default"
+                onClick={() => setPage(displayTotalPages)}
+                disabled={page === displayTotalPages || isLoading}
+                className="rounded-full px-4"
+              >
+                »
+              </Button>
+            </form>
           </div>
         </section>
       </div>
