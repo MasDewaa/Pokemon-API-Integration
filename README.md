@@ -63,7 +63,7 @@ Add real screenshots from your environment before submitting:
 
 | Dashboard | Detail Modal |
 | --- | --- |
-| ![Dashboard](./screenshots/dashboard.png) | ![Detail Modal](./screenshots/modal.png) |
+| ![Dashboard](./screenshots/Dashboard.png) | ![Detail Modal](./screenshots/Modal.png) |
 
 > Place the captured images in a `screenshots/` folder at the project root to keep the paths valid.
 
