@@ -25,8 +25,8 @@ const PAGE_SIZE = 24;
 const THEME_STORAGE_KEY = "pokedex-theme";
 
 const sortOptions = [
-  { value: "id-asc", label: "Pokédex ID ↑" },
-  { value: "id-desc", label: "Pokédex ID ↓" },
+  { value: "id-asc", label: "PokeDewa ID ↑" },
+  { value: "id-desc", label: "PokeDewa ID ↓" },
   { value: "name-asc", label: "Name A-Z" },
   { value: "name-desc", label: "Name Z-A" },
   { value: "weight-desc", label: "Weight Heavy-Light" },
@@ -329,13 +329,13 @@ export default function App() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex-1 space-y-3">
               <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-primary">
-                PokéAPI
+                PokeAPI
               </span>
               <h1 className="text-4xl font-bold leading-tight sm:text-5xl">
-                PokéDex Explorer
+                PokeDewa Explorer
               </h1>
               <p className="max-w-2xl text-base text-muted-foreground">
-                Explore richly detailed Pokémon profiles, filter by elemental types, and surface battle-ready insights with an elevated interface powered by shadcn/ui.
+                Explore richly detailed Pokemon profiles, filter by elemental types, and surface battle-ready insights with an elevated interface powered by shadcn/ui.
               </p>
             </div>
             <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-muted/30 px-4 py-3">
@@ -353,12 +353,12 @@ export default function App() {
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="w-full max-w-xl space-y-2">
                 <Label htmlFor="pokemon-search" className="text-sm font-semibold text-muted-foreground">
-                  Search Pokémon
+                  Search Pokemon
                 </Label>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                   <Input
                     id="pokemon-search"
-                    placeholder="Search by name or Pokédex ID"
+                    placeholder="Search by name or PokeDewa ID"
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
                     className="h-12 flex-1 rounded-2xl border-border/60 bg-background/80 text-base shadow-inner"
@@ -448,9 +448,9 @@ export default function App() {
             </div>
           ) : (
             <Card className="border-border/60 bg-card/80 p-10 text-center shadow-lg">
-              <h3 className="text-xl font-semibold text-foreground">No Pokémon found</h3>
+              <h3 className="text-xl font-semibold text-foreground">No Pokemon found</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Adjust your search or filters to discover more Pokémon.
+                Adjust your search or filters to discover more Pokemon.
               </p>
             </Card>
           )}

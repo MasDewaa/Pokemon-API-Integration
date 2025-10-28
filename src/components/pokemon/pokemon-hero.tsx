@@ -27,7 +27,7 @@ export function PokemonHero({ featured, totalLoaded, averagePower, topCategories
             Build the ultimate battle squad
           </h2>
           <p className="max-w-xl text-base text-muted-foreground">
-            Analyze live power metrics, scout the most elite Pokémon, and dive into a cinematic PokéDex experience inspired by arcade battle terminals.
+            Analyze live power metrics, scout the most elite Pokemon, and dive into a cinematic PokeDewa experience inspired by arcade battle terminals.
           </p>
 
           <div className="grid gap-4 sm:grid-cols-3">

@@ -15,7 +15,7 @@ export async function fetchPokemonBatch(
   const listResponse = await fetch(`${API_BASE}/pokemon?offset=${offset}&limit=${limit}`);
 
   if (!listResponse.ok) {
-    throw new Error("Failed to fetch Pokémon list");
+    throw new Error("Failed to fetch Pokemon list");
   }
 
   const listData = (await listResponse.json()) as {
@@ -28,7 +28,7 @@ export async function fetchPokemonBatch(
     listData.results.map(async (entry) => {
       const detailResponse = await fetch(entry.url);
       if (!detailResponse.ok) {
-        throw new Error("Failed to fetch Pokémon detail");
+        throw new Error("Failed to fetch Pokemon detail");
       }
       const detail = await detailResponse.json();
       return simplifyPokemon(detail);
@@ -47,7 +47,7 @@ export async function fetchPokemonTypes(): Promise<string[]> {
   const response = await fetch(`${API_BASE}/type`);
 
   if (!response.ok) {
-    throw new Error("Failed to fetch Pokémon types");
+    throw new Error("Failed to fetch Pokemon types");
   }
 
   const data = (await response.json()) as {
@@ -115,7 +115,7 @@ function simplifyPokemon(detail: any): PokemonData {
 export async function fetchEvolutionChain(pokemonId: number): Promise<PokemonEvolutionStage[]> {
   const speciesResponse = await fetch(`${API_BASE}/pokemon-species/${pokemonId}`);
   if (!speciesResponse.ok) {
-    throw new Error("Failed to fetch Pokémon species");
+    throw new Error("Failed to fetch Pokemon species");
   }
 
   const speciesData = await speciesResponse.json();

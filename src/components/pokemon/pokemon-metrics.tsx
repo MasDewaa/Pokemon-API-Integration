@@ -9,7 +9,7 @@ interface PokemonMetricsProps {
 const metrics = [
   {
     id: "loaded",
-    title: "Total Pokémon Loaded",
+    title: "Total Pokemon Loaded",
     format: (value: number) => value.toLocaleString(),
   },
   {
